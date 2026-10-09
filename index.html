@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e110f">
+<title>KUB.studio</title>
+<meta name="description" content="Сайты, дашборды и Telegram Mini Apps для криптопроектов. Websites, dashboards and Telegram Mini Apps for crypto projects.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230e110f'/%3E%3Crect x='8' y='8' width='16' height='16' fill='%23c8f04c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@700;800&family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#0e110f; --surface:#151915; --line:#252b26; --text:#e8ece4; --muted:#8c978b;
+  --lime:#c8f04c; --on-lime:#10150a; --r:2px;
+  --pad:clamp(16px,4vw,40px);
+  --f-head:'Geologica',system-ui,sans-serif;
+  --f-body:'Onest',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--text);font:400 1.0625rem/1.6 var(--f-body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
+main,footer{position:relative;z-index:1}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 var(--pad)}
+
+/* header */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(14,17,15,.9);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.hdr .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font:800 1.25rem/1 var(--f-head);letter-spacing:-.02em;text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+.logo span{color:var(--muted);font-weight:700}
+.hdr-r{display:flex;align-items:center;gap:6px}
+.nav{display:flex;gap:4px;margin-right:8px}
+.nav a{font-size:.9375rem;font-weight:500;text-decoration:none;color:var(--muted);padding:0 12px;min-height:44px;display:inline-flex;align-items:center;transition:color .2s}
+.nav a:hover{color:var(--text)}
+.lang{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;background:transparent;color:var(--text);border:1px solid var(--line);border-radius:var(--r);font:500 .8125rem/1 var(--f-mono);letter-spacing:.04em;cursor:pointer;transition:border-color .2s}
+.lang:hover{border-color:var(--muted)}
+.lang svg{width:18px;height:18px;flex:none}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:var(--r);border:1px solid var(--line);background:transparent;color:var(--text);font:600 1rem/1 var(--f-body);text-decoration:none;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.btn:hover{border-color:var(--muted)}
+.btn-p{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+.btn-p:hover{background:#d6f56e;border-color:#d6f56e}
+.btn-s{min-height:44px;padding:0 16px;font-size:.9375rem}
+
+/* sections */
+.sec{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:96px 0 72px;scroll-margin-top:0}
+.sec .wrap{display:flex}
+.sec.r .wrap{justify-content:flex-end}
+.col{width:min(560px,52%)}
+.hero .col{width:min(740px,64%)}
+.eyebrow{font:500 .8125rem/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 24px}
+h1,h2{font-family:var(--f-head);font-weight:800;margin:0;text-wrap:balance;text-shadow:0 0 22px var(--bg)}
+h1{font-size:clamp(2.15rem,7vw,6rem);line-height:.97;letter-spacing:-.035em}
+h2{font-size:clamp(1.9rem,4.3vw,3.5rem);line-height:1;letter-spacing:-.03em}
+.lead{margin:28px 0 0;color:var(--text);font-size:clamp(1.0625rem,1.5vw,1.25rem);max-width:34em;text-shadow:0 0 14px var(--bg)}
+.sec p{text-wrap:pretty}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:56px;border-top:1px solid var(--line)}
+.fact{padding:20px 20px 0 0}
+.fact b{display:block;font:700 clamp(1.1rem,2vw,1.5rem)/1.1 var(--f-head);letter-spacing:-.02em}
+.fact span{display:block;margin-top:6px;font-size:.875rem;line-height:1.4;color:var(--muted)}
+
+.list{list-style:none;margin:32px 0 0;padding:0;border-top:1px solid var(--line)}
+.list li{position:relative;padding:14px 0 14px 28px;border-bottom:1px solid var(--line);text-shadow:0 0 14px var(--bg)}
+.list li::before{content:"";position:absolute;left:2px;top:1.35em;width:8px;height:8px;border:1px solid var(--muted)}
+.tag{display:inline-block;margin-top:32px;padding:8px 12px;border:1px solid var(--lime);border-radius:var(--r);color:var(--lime);font:500 .8125rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+
+.steps{list-style:none;margin:32px 0 0;padding:0;border-top:1px solid var(--line);counter-reset:s}
+.steps li{display:grid;grid-template-columns:52px 1fr;gap:4px 8px;padding:18px 0;border-bottom:1px solid var(--line);text-shadow:0 0 14px var(--bg)}
+.steps .n{grid-row:span 2;font:500 .9375rem/1.7 var(--f-mono);color:var(--lime)}
+.steps b{font:700 1.125rem/1.35 var(--f-head);letter-spacing:-.01em}
+.steps p{margin:0;color:var(--muted);font-size:.9688rem;line-height:1.5}
+.avg{margin:28px 0 0;font:500 .9375rem/1.5 var(--f-mono);color:var(--muted)}
+
+/* form */
+form{margin-top:32px;display:grid;gap:18px}
+.field{display:grid;gap:8px}
+label{font:500 .8125rem/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{width:100%;min-height:48px;padding:12px 14px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:var(--r);font:400 1rem/1.4 var(--f-body);transition:border-color .2s;-webkit-appearance:none;appearance:none}
+textarea{min-height:120px;resize:vertical}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 21px,calc(100% - 15px) 21px;background-size:5px 5px;background-repeat:no-repeat;padding-right:40px}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+input:hover,select:hover,textarea:hover{border-color:#3a423b}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--text);outline-offset:2px;border-color:var(--text)}
+[aria-invalid="true"]{border-color:#ff8a7a}
+.err{min-height:0;margin:0;font-size:.875rem;line-height:1.3;color:#ff9d8f}
+.err:empty{display:none}
+.form-actions{margin-top:6px}
+.result{margin-top:28px;padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.result[hidden]{display:none}
+.result h3{margin:0 0 4px;font:700 1.125rem/1.3 var(--f-head)}
+.result .hint{margin:0 0 14px;color:var(--muted);font-size:.9375rem}
+.result textarea{font:400 .875rem/1.5 var(--f-mono);min-height:150px;background:var(--bg)}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.status{margin:10px 0 0;min-height:1.4em;font-size:.875rem;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+footer{border-top:1px solid var(--line);background:rgba(14,17,15,.92)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;padding-top:28px;padding-bottom:calc(28px + env(safe-area-inset-bottom));font:400 .875rem/1.5 var(--f-mono);color:var(--muted)}
+footer a{color:var(--text);text-decoration:none}
+
+/* Telegram Mini App mode */
+.in-tg .nav,.in-tg .hdr-cta,.in-tg .submit{display:none}
+.in-tg footer .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+
+/* mobile */
+@media (max-width:860px){
+  #stage{opacity:.42}
+  .sec{min-height:0;padding:104px 0 64px}
+  .hero{min-height:100svh}
+  .sec .wrap,.sec.r .wrap{display:block}
+  .col,.hero .col{width:100%}
+  .sec,.sec h1,.sec h2,.sec p,.sec li,.sec b,.sec .eyebrow,.fact span{text-shadow:0 0 10px var(--bg),0 0 3px var(--bg),0 0 22px var(--bg)}
+  .nav{display:none}
+  .facts{margin-top:44px}
+}
+@media (max-width:560px){
+  .facts{grid-template-columns:1fr;border-top:0}
+  .fact{padding:14px 0;border-top:1px solid var(--line);display:flex;align-items:baseline;gap:14px}
+  .fact b{flex:none;min-width:7.5em}
+  .fact span{margin:0}
+  .btn{width:100%}
+}
+@media (max-width:860px){.btn,.tag,.lang{text-shadow:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<header class="hdr">
+  <div class="wrap">
+    <a class="logo" href="#hero" aria-label="KUB.studio">KUB<span>.studio</span></a>
+    <div class="hdr-r">
+      <nav class="nav" aria-label="Main">
+        <a href="#site" data-i18n="nav_services">Услуги</a>
+        <a href="#process" data-i18n="nav_process">Процесс</a>
+      </nav>
+      <button type="button" class="lang" id="lang-btn" data-i18n-aria="lang_aria" aria-label="Сменить язык">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg>
+        <span id="lang-code">RU</span>
+      </button>
+      <a class="btn btn-p btn-s hdr-cta" href="#brief" data-i18n="nav_cta">Заявка</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="sec hero" id="hero" data-sec>
+    <div class="wrap"><div class="col">
+      <p class="eyebrow" data-i18n="hero_eyebrow">Веб-студия для крипто</p>
+      <h1 data-i18n="hero_h">Сайты и мини-приложения для криптопроектов</h1>
+      <p class="lead" data-i18n="hero_p">Лендинги, дашборды и Telegram Mini Apps. Дизайн, разработка и запуск, средний срок до 3 недель.</p>
+      <div class="actions">
+        <a class="btn btn-p" href="#brief" data-i18n="hero_cta1">Оставить заявку</a>
+        <a class="btn" data-tg-link href="#" target="_blank" rel="noopener" data-i18n="hero_cta2">Написать в Telegram</a>
+      </div>
+      <div class="facts">
+        <div class="fact"><b data-i18n="fact1_n">до 3 недель</b><span data-i18n="fact1_l">средний срок проекта</span></div>
+        <div class="fact"><b data-i18n="fact2_n">RU / EN</b><span data-i18n="fact2_l">две версии сайта</span></div>
+        <div class="fact"><b data-i18n="fact3_n">Чат</b><span data-i18n="fact3_l">вместо созвонов</span></div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec r" id="site" data-sec>
+    <div class="wrap"><div class="col">
+      <p class="eyebrow" data-i18n="site_e">01 / Сайт и лендинг</p>
+      <h2 data-i18n="site_h">Сайт для запуска токена или продукта</h2>
+      <p class="lead" data-i18n="site_p">Объясняет проект за один экран, быстро открывается на телефоне и выглядит как проект, которому можно доверять.</p>
+      <ul class="list">
+        <li data-i18n="site_l1">Адаптив под телефон и компьютер</li>
+        <li data-i18n="site_l2">Русская и английская версии</li>
+        <li data-i18n="site_l3">Форма заявки и ссылки на ваши соцсети</li>
+        <li data-i18n="site_l4">Домен, хостинг и публикация</li>
+      </ul>
+      <span class="tag" data-i18n="price">Стоимость: индивидуально</span>
+    </div></div>
+  </section>
+
+  <section class="sec" id="dash" data-sec>
+    <div class="wrap"><div class="col">
+      <p class="eyebrow" data-i18n="dash_e">02 / Дашборд</p>
+      <h2 data-i18n="dash_h">Цифры проекта на одном экране</h2>
+      <p class="lead" data-i18n="dash_p">Цена, объёмы, холдеры, стейкинг, активность сообщества. Показываем так, чтобы смысл читался за несколько секунд.</p>
+      <ul class="list">
+        <li data-i18n="dash_l1">Графики, таблицы и ключевые метрики</li>
+        <li data-i18n="dash_l2">Данные из публичных API и вашей базы</li>
+        <li data-i18n="dash_l3">Удобно читается на телефоне</li>
+      </ul>
+      <span class="tag" data-i18n="price">Стоимость: индивидуально</span>
+    </div></div>
+  </section>
+
+  <section class="sec r" id="miniapp" data-sec>
+    <div class="wrap"><div class="col">
+      <p class="eyebrow" data-i18n="tma_e">03 / Telegram Mini App</p>
+      <h2 data-i18n="tma_h">Приложение внутри вашего сообщества</h2>
+      <p class="lead" data-i18n="tma_p">Открывается прямо в Telegram, без установки. Вход в один клик через аккаунт Telegram.</p>
+      <ul class="list">
+        <li data-i18n="tma_l1">Вход через Telegram</li>
+        <li data-i18n="tma_l2">Подключение кошелька TON через TON Connect</li>
+        <li data-i18n="tma_l3">Задания, рефералы, каталог: по вашей задаче</li>
+        <li data-i18n="tma_l4">Бот для запуска и уведомлений</li>
+      </ul>
+      <span class="tag" data-i18n="price">Стоимость: индивидуально</span>
+    </div></div>
+  </section>
+
+  <section class="sec" id="process" data-sec>
+    <div class="wrap"><div class="col">
+      <p class="eyebrow" data-i18n="proc_e">04 / Процесс</p>
+      <h2 data-i18n="proc_h">Как мы работаем</h2>
+      <ol class="steps">
+        <li><span class="n">01</span><b data-i18n="s1t">Бриф или обсуждение</b><p data-i18n="s1d">Заполняете бриф на сайте или обсуждаем задачу в чате, созвон не нужен.</p></li>
+        <li><span class="n">02</span><b data-i18n="s2t">Предоплата</b><p data-i18n="s2d">Фиксируем объём и срок, вы вносите предоплату. Принимаем фиат и крипту.</p></li>
+        <li><span class="n">03</span><b data-i18n="s3t">Дизайн на согласование</b><p data-i18n="s3d">Высылаем дизайн, вы смотрите и вносите правки.</p></li>
+        <li><span class="n">04</span><b data-i18n="s4t">Разработка</b><p data-i18n="s4d">Собираем и показываем промежуточный результат.</p></li>
+        <li><span class="n">05</span><b data-i18n="s5t">Запуск</b><p data-i18n="s5d">Публикуем, проверяем на телефонах и передаём доступы.</p></li>
+      </ol>
+      <p class="avg" data-i18n="avg">Средний срок проекта: до 3 недель</p>
+    </div></div>
+  </section>
+
+  <section class="sec" id="brief" data-sec>
+    <div class="wrap"><div class="col">
+      <p class="eyebrow" data-i18n="brief_e">05 / Бриф</p>
+      <h2 data-i18n="brief_h">Расскажите о проекте</h2>
+      <p class="lead" data-i18n="brief_p">Стоимость посчитаем после брифа. Отвечаем в чате.</p>
+
+      <form id="brief-form" novalidate>
+        <div class="field">
+          <label for="f-name" data-i18n="f_name">Имя</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" data-i18n-ph="ph_name" placeholder="Как к вам обращаться" aria-describedby="e-name">
+          <p class="err" id="e-name" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="f-contact" data-i18n="f_contact">Контакт</label>
+          <input id="f-contact" name="contact" type="text" autocomplete="off" data-i18n-ph="ph_contact" placeholder="@username, email или телефон" aria-describedby="e-contact">
+          <p class="err" id="e-contact" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="f-type" data-i18n="f_type">Что нужно</label>
+          <select id="f-type" name="type">
+            <option value="landing" data-i18n="o1">Лендинг</option>
+            <option value="site" data-i18n="o2">Сайт</option>
+            <option value="dashboard" data-i18n="o3">Дашборд</option>
+            <option value="miniapp" data-i18n="o4">Telegram Mini App</option>
+            <option value="unknown" data-i18n="o5" selected>Пока не знаю</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-about" data-i18n="f_about">О проекте</label>
+          <textarea id="f-about" name="about" data-i18n-ph="ph_about" placeholder="Коротко: что за проект, сроки, ссылки"></textarea>
+        </div>
+        <div class="form-actions submit">
+          <button type="submit" class="btn btn-p" id="submit-btn" data-i18n="btn_prepare">Подготовить бриф</button>
+        </div>
+      </form>
+
+      <div class="result" id="result" hidden>
+        <h3 data-i18n="res_h">Ваш бриф</h3>
+        <p class="hint" data-i18n="res_hint">Скопируйте текст и отправьте его в чат Telegram.</p>
+        <label class="sr" for="brief-out" data-i18n="res_h">Ваш бриф</label>
+        <textarea id="brief-out" readonly rows="8"></textarea>
+        <div class="row">
+          <button type="button" class="btn" id="copy-btn" data-i18n="copy">Скопировать</button>
+          <a class="btn btn-p" data-tg-link href="#" target="_blank" rel="noopener" data-i18n="open_chat">Открыть чат в Telegram</a>
+        </div>
+        <p class="status" id="copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><span data-i18n="foot_tg">Telegram:</span> <a data-tg-link href="#" target="_blank" rel="noopener" id="foot-handle">@kubstudio</a></span>
+    <span>© <span id="year">2026</span> KUB.studio</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- config ---------- */
+var TG_HANDLE = 'kubstudio';           // Telegram-хендл студии без @
+var TG_URL = 'https://t.me/' + TG_HANDLE;
+
+/* ---------- i18n ---------- */
+var I18N = {
+ru:{
+  nav_services:'Услуги', nav_process:'Процесс', nav_cta:'Заявка', lang_aria:'Сменить язык',
+  hero_eyebrow:'Веб-студия для крипто',
+  hero_h:'Сайты и мини-приложения для криптопроектов',
+  hero_p:'Лендинги, дашборды и Telegram Mini Apps. Дизайн, разработка и запуск, средний срок до 3 недель.',
+  hero_cta1:'Оставить заявку', hero_cta2:'Написать в Telegram',
+  fact1_n:'до 3 недель', fact1_l:'средний срок проекта',
+  fact2_n:'RU / EN', fact2_l:'две версии сайта',
+  fact3_n:'Чат', fact3_l:'вместо созвонов',
+  price:'Стоимость: индивидуально',
+  site_e:'01 / Сайт и лендинг', site_h:'Сайт для запуска токена или продукта',
+  site_p:'Объясняет проект за один экран, быстро открывается на телефоне и выглядит как проект, которому можно доверять.',
+  site_l1:'Адаптив под телефон и компьютер', site_l2:'Русская и английская версии',
+  site_l3:'Форма заявки и ссылки на ваши соцсети', site_l4:'Домен, хостинг и публикация',
+  dash_e:'02 / Дашборд', dash_h:'Цифры проекта на одном экране',
+  dash_p:'Цена, объёмы, холдеры, стейкинг, активность сообщества. Показываем так, чтобы смысл читался за несколько секунд.',
+  dash_l1:'Графики, таблицы и ключевые метрики', dash_l2:'Данные из публичных API и вашей базы', dash_l3:'Удобно читается на телефоне',
+  tma_e:'03 / Telegram Mini App', tma_h:'Приложение внутри вашего сообщества',
+  tma_p:'Открывается прямо в Telegram, без установки. Вход в один клик через аккаунт Telegram.',
+  tma_l1:'Вход через Telegram', tma_l2:'Подключение кошелька TON через TON Connect',
+  tma_l3:'Задания, рефералы, каталог: по вашей задаче', tma_l4:'Бот для запуска и уведомлений',
+  proc_e:'04 / Процесс', proc_h:'Как мы работаем',
+  s1t:'Бриф или обсуждение', s1d:'Заполняете бриф на сайте или обсуждаем задачу в чате, созвон не нужен.',
+  s2t:'Предоплата', s2d:'Фиксируем объём и срок, вы вносите предоплату. Принимаем фиат и крипту.',
+  s3t:'Дизайн на согласование', s3d:'Высылаем дизайн, вы смотрите и вносите правки.',
+  s4t:'Разработка', s4d:'Собираем и показываем промежуточный результат.',
+  s5t:'Запуск', s5d:'Публикуем, проверяем на телефонах и передаём доступы.',
+  avg:'Средний срок проекта: до 3 недель',
+  brief_e:'05 / Бриф', brief_h:'Расскажите о проекте',
+  brief_p:'Стоимость посчитаем после брифа. Отвечаем в чате.',
+  f_name:'Имя', f_contact:'Контакт', f_type:'Что нужно', f_about:'О проекте',
+  ph_name:'Как к вам обращаться', ph_contact:'@username, email или телефон', ph_about:'Коротко: что за проект, сроки, ссылки',
+  o1:'Лендинг', o2:'Сайт', o3:'Дашборд', o4:'Telegram Mini App', o5:'Пока не знаю',
+  btn_prepare:'Подготовить бриф', tg_send:'Отправить заявку',
+  err_name:'Укажите имя', err_contact:'Укажите, как с вами связаться',
+  res_h:'Ваш бриф', res_hint:'Скопируйте текст и отправьте его в чат Telegram.',
+  copy:'Скопировать', copied:'Скопировано', copy_sel:'Текст выделен: нажмите Ctrl+C или ⌘C.',
+  open_chat:'Открыть чат в Telegram',
+  foot_tg:'Telegram:',
+  b_title:'Заявка KUB.studio', b_name:'Имя', b_contact:'Контакт', b_type:'Что нужно', b_about:'О проекте', b_empty:'не указано'
+},
+en:{
+  nav_services:'Services', nav_process:'Process', nav_cta:'Request', lang_aria:'Switch language',
+  hero_eyebrow:'Web studio for crypto',
+  hero_h:'Websites and mini apps for crypto projects',
+  hero_p:'Landing pages, dashboards and Telegram Mini Apps. Design, development and launch in up to 3 weeks on average.',
+  hero_cta1:'Send a request', hero_cta2:'Message us on Telegram',
+  fact1_n:'up to 3 weeks', fact1_l:'average project time',
+  fact2_n:'RU / EN', fact2_l:'two language versions',
+  fact3_n:'Chat', fact3_l:'instead of calls',
+  price:'Price: custom',
+  site_e:'01 / Website & landing', site_h:'A website for your token or product launch',
+  site_p:'Explains the project on one screen, opens fast on a phone and looks like a project you can trust.',
+  site_l1:'Responsive for phone and desktop', site_l2:'Russian and English versions',
+  site_l3:'Request form and links to your socials', site_l4:'Domain, hosting and publishing',
+  dash_e:'02 / Dashboard', dash_h:'Your project’s numbers on one screen',
+  dash_p:'Price, volume, holders, staking, community activity. Shown so the meaning reads in a few seconds.',
+  dash_l1:'Charts, tables and key metrics', dash_l2:'Data from public APIs and your database', dash_l3:'Easy to read on a phone',
+  tma_e:'03 / Telegram Mini App', tma_h:'An app inside your community',
+  tma_p:'Opens right in Telegram, no install. One-click sign-in with a Telegram account.',
+  tma_l1:'Sign-in with Telegram', tma_l2:'TON wallet connection via TON Connect',
+  tma_l3:'Tasks, referrals, catalog: for your use case', tma_l4:'A bot for launch and notifications',
+  proc_e:'04 / Process', proc_h:'How we work',
+  s1t:'Brief or discussion', s1d:'Fill in the brief on the site or discuss the task in chat. No calls needed.',
+  s2t:'Prepayment', s2d:'We fix the scope and deadline, you make a prepayment. Fiat and crypto accepted.',
+  s3t:'Design for approval', s3d:'We send the design, you review it and request changes.',
+  s4t:'Development', s4d:'We build it and show interim results.',
+  s5t:'Launch', s5d:'We publish, test on phones and hand over access.',
+  avg:'Average project time: up to 3 weeks',
+  brief_e:'05 / Brief', brief_h:'Tell us about your project',
+  brief_p:'We’ll calculate the price after the brief. We reply in chat.',
+  f_name:'Name', f_contact:'Contact', f_type:'What you need', f_about:'About the project',
+  ph_name:'How should we address you', ph_contact:'@username, email or phone', ph_about:'Briefly: what the project is, timing, links',
+  o1:'Landing page', o2:'Website', o3:'Dashboard', o4:'Telegram Mini App', o5:'Not sure yet',
+  btn_prepare:'Prepare brief', tg_send:'Send request',
+  err_name:'Enter your name', err_contact:'Enter a way to reach you',
+  res_h:'Your brief', res_hint:'Copy the text and send it to our Telegram chat.',
+  copy:'Copy', copied:'Copied', copy_sel:'Text selected: press Ctrl+C or ⌘C.',
+  open_chat:'Open Telegram chat',
+  foot_tg:'Telegram:',
+  b_title:'KUB.studio request', b_name:'Name', b_contact:'Contact', b_type:'Needed', b_about:'About', b_empty:'not specified'
+}};
+
+/* ---------- Telegram ---------- */
+var tg = window.Telegram && window.Telegram.WebApp;
+var inTg = !!(tg && tg.initData);
+var root = document.documentElement;
+
+var lang = 'ru';
+function pickLang(){
+  var saved = null;
+  try{ saved = localStorage.getItem('kub-lang'); }catch(e){}
+  if(saved === 'ru' || saved === 'en') return saved;
+  try{
+    var u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if(u && u.language_code) return /^ru/i.test(u.language_code) ? 'ru' : 'en';
+  }catch(e){}
+  return /^ru/i.test(navigator.language || '') ? 'ru' : 'en';
+}
+function t(k){ return (I18N[lang] && I18N[lang][k]) || k; }
+
+var $ = function(id){ return document.getElementById(id); };
+var form = $('brief-form'), fName = $('f-name'), fContact = $('f-contact'), fType = $('f-type'), fAbout = $('f-about');
+var eName = $('e-name'), eContact = $('e-contact');
+var result = $('result'), out = $('brief-out'), copyBtn = $('copy-btn'), copyStatus = $('copy-status');
+
+function applyLang(l){
+  lang = l;
+  root.lang = l;
+  var i, els;
+  els = document.querySelectorAll('[data-i18n]');
+  for(i=0;i<els.length;i++){ els[i].textContent = t(els[i].getAttribute('data-i18n')); }
+  els = document.querySelectorAll('[data-i18n-ph]');
+  for(i=0;i<els.length;i++){ els[i].setAttribute('placeholder', t(els[i].getAttribute('data-i18n-ph'))); }
+  els = document.querySelectorAll('[data-i18n-aria]');
+  for(i=0;i<els.length;i++){ els[i].setAttribute('aria-label', t(els[i].getAttribute('data-i18n-aria'))); }
+  $('lang-code').textContent = l.toUpperCase();
+  if(eName.textContent) eName.textContent = t('err_name');
+  if(eContact.textContent) eContact.textContent = t('err_contact');
+  if(!result.hidden) out.value = buildBrief();
+  copyStatus.textContent = '';
+  if(inTg && tg.MainButton){ try{ tg.MainButton.setText(t('tg_send')); }catch(e){} }
+}
+
+/* ---------- links ---------- */
+(function(){
+  var links = document.querySelectorAll('[data-tg-link]');
+  for(var i=0;i<links.length;i++){
+    links[i].setAttribute('href', TG_URL);
+    links[i].addEventListener('click', function(e){
+      if(inTg && tg.openTelegramLink){ e.preventDefault(); try{ tg.openTelegramLink(TG_URL); }catch(err){ window.open(TG_URL,'_blank'); } }
+    });
+  }
+  $('foot-handle').textContent = '@' + TG_HANDLE;
+  $('year').textContent = new Date().getFullYear();
+})();
+
+/* ---------- form ---------- */
+function typeLabel(){ var o = fType.options[fType.selectedIndex]; return o ? o.textContent : ''; }
+function data(){
+  return {
+    name: fName.value.trim(),
+    contact: fContact.value.trim(),
+    type: typeLabel(),
+    about: fAbout.value.trim(),
+    lang: lang
+  };
+}
+function buildBrief(){
+  var d = data();
+  return t('b_title') + '\n' +
+    t('b_name') + ': ' + d.name + '\n' +
+    t('b_contact') + ': ' + d.contact + '\n' +
+    t('b_type') + ': ' + d.type + '\n' +
+    t('b_about') + ': ' + (d.about || t('b_empty'));
+}
+function validate(){
+  var d = data(), ok = true, first = null;
+  if(!d.name){ eName.textContent = t('err_name'); fName.setAttribute('aria-invalid','true'); ok = false; first = first || fName; }
+  else { eName.textContent = ''; fName.removeAttribute('aria-invalid'); }
+  if(!d.contact){ eContact.textContent = t('err_contact'); fContact.setAttribute('aria-invalid','true'); ok = false; first = first || fContact; }
+  else { eContact.textContent = ''; fContact.removeAttribute('aria-invalid'); }
+  if(first && !inTg){ first.focus(); }
+  return ok;
+}
+fName.addEventListener('input', function(){ if(fName.value.trim()){ eName.textContent=''; fName.removeAttribute('aria-invalid'); } });
+fContact.addEventListener('input', function(){ if(fContact.value.trim()){ eContact.textContent=''; fContact.removeAttribute('aria-invalid'); } });
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  if(inTg){ sendToTg(); return; }
+  if(!validate()) return;
+  out.value = buildBrief();
+  result.hidden = false;
+  copyStatus.textContent = '';
+  result.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'center'});
+});
+
+function selectOut(){ out.focus(); out.select(); try{ out.setSelectionRange(0, out.value.length); }catch(e){} }
+copyBtn.addEventListener('click', function(){
+  var text = out.value;
+  function fallback(){
+    selectOut();
+    var ok = false;
+    try{ ok = document.execCommand('copy'); }catch(e){}
+    copyStatus.textContent = ok ? t('copied') : t('copy_sel');
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ copyStatus.textContent = t('copied'); }, fallback);
+  } else { fallback(); }
+});
+
+function sendToTg(){
+  if(!validate()){
+    try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('error'); }catch(e){}
+    var bad = document.querySelector('[aria-invalid="true"]');
+    if(bad) bad.scrollIntoView({block:'center'});
+    return;
+  }
+  try{ tg.sendData(JSON.stringify(data())); }catch(e){}
+}
+
+if(inTg){
+  root.classList.add('in-tg');
+  try{ tg.ready(); }catch(e){}
+  try{ tg.expand(); }catch(e){}
+  try{ tg.setHeaderColor('#0e110f'); }catch(e){}
+  try{ tg.setBackgroundColor('#0e110f'); }catch(e){}
+  try{ tg.setBottomBarColor && tg.setBottomBarColor('#0e110f'); }catch(e){}
+  try{
+    tg.MainButton.setParams({text:'', color:'#c8f04c', text_color:'#10150a'});
+    tg.MainButton.onClick(sendToTg);
+    tg.MainButton.show();
+  }catch(e){}
+}
+
+$('lang-btn').addEventListener('click', function(){
+  var n = lang === 'ru' ? 'en' : 'ru';
+  try{ localStorage.setItem('kub-lang', n); }catch(e){}
+  applyLang(n);
+});
+
+var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+applyLang(pickLang());
+
+/* ---------- cube canvas ---------- */
+var canvas = $('stage'), ctx = canvas.getContext('2d');
+var W = 0, H = 0, dpr = 1;
+var weak = (navigator.hardwareConcurrency || 8) <= 4;
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, weak ? 1.5 : 2);
+  canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  dirty = true;
+}
+var dirty = true;
+
+var N = 27, S = 1.12;
+var ACC = [7,16,25];
+
+/* assign slots to cubes: accent cubes take accSlots, the rest fill in order */
+function assign(slots, accSlots){
+  var res = new Array(N), used = {}, i, k = 0;
+  for(i=0;i<3;i++){ res[ACC[i]] = slots[accSlots[i]]; used[accSlots[i]] = true; }
+  for(i=0;i<N;i++){
+    if(res[i]) continue;
+    while(used[k]) k++;
+    res[i] = slots[k]; k++;
+  }
+  return res;
+}
+function pack(arr){
+  var pos = new Float32Array(N*3), size = new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    pos[i*3]=arr[i].p[0]; pos[i*3+1]=arr[i].p[1]; pos[i*3+2]=arr[i].p[2];
+    size[i*3]=arr[i].s[0]; size[i*3+1]=arr[i].s[1]; size[i*3+2]=arr[i].s[2];
+  }
+  return {pos:pos,size:size};
+}
+function shapeCube(){
+  var s=[], a,b,c;
+  for(a=0;a<3;a++)for(b=0;b<3;b++)for(c=0;c<3;c++) s.push({p:[(a-1)*S,(b-1)*S,(c-1)*S], s:[1,1,1]});
+  return pack(assign(s,[7,16,25]));       // верхний ряд, середина по глубине
+}
+function shapeSlab(){
+  var s=[], i,j;
+  for(j=0;j<3;j++)for(i=0;i<9;i++) s.push({p:[(i-4)*S,0,(j-1)*S], s:[1,.5,1]});
+  return pack(assign(s,[9+1,9+4,9+7]));    // средний ряд, три точки
+}
+function shapeBars(){
+  var h=[2,4,3,5,2,6,1,3,1], s=[], x,l, top={};
+  for(x=0;x<9;x++)for(l=0;l<h[x];l++){
+    if(l===h[x]-1 && (x===1||x===3||x===5)) top[x]=s.length;
+    s.push({p:[(x-4)*S,-3+l*S,0], s:[1,1,1]});
+  }
+  return pack(assign(s,[top[1],top[3],top[5]]));  // вершины трёх самых высоких столбиков
+}
+function shapePhone(){
+  var s=[], x,y;
+  for(y=0;y<9;y++)for(x=0;x<3;x++) s.push({p:[(x-1)*S,(y-4)*S,0], s:[1,1,.55]});
+  return pack(assign(s,[0,1,2]));           // нижний ряд
+}
+var cube = shapeCube();
+var SHAPES = [cube, shapeSlab(), shapeBars(), shapePhone(), cube, cube];
+var CAMS = [
+  {cx:.74, yaw:.62,  pitch:.42, sc:.86,  osc:.45},
+  {cx:.27, yaw:-.5,  pitch:.5,  sc:.45,  osc:.1},
+  {cx:.73, yaw:.5,   pitch:.34, sc:.47,  osc:.1},
+  {cx:.27, yaw:-.6,  pitch:.2,  sc:.39,  osc:.1},
+  {cx:.74, yaw:-.62, pitch:.4,  sc:.9,   osc:.3},
+  {cx:.74, yaw:.95,  pitch:.36, sc:.9,   osc:.25}
+];
+var NS = SHAPES.length;
+
+/* scatter start state */
+function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+var rnd = rng(27);
+var scPos = new Float32Array(N*3), scSize = new Float32Array(N*3);
+(function(){
+  for(var i=0;i<N;i++){
+    var th = rnd()*Math.PI*2, ph = Math.acos(2*rnd()-1), r = 7 + rnd()*6;
+    scPos[i*3]   = r*Math.sin(ph)*Math.cos(th);
+    scPos[i*3+1] = r*Math.cos(ph);
+    scPos[i*3+2] = r*Math.sin(ph)*Math.sin(th);
+    var s = .45 + rnd()*.9;
+    scSize[i*3]=scSize[i*3+1]=scSize[i*3+2]=s;
+  }
+})();
+
+var VERT = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+/* face: axis index, sign, vertex ids */
+var FACES = [
+  [2,-1,[0,1,2,3]],[2,1,[4,5,6,7]],
+  [0,-1,[0,3,7,4]],[0,1,[1,5,6,2]],
+  [1,-1,[0,1,5,4]],[1,1,[3,2,6,7]]
+];
+var LX=-.5, LY=.72, LZ=-.48, LL=Math.sqrt(LX*LX+LY*LY+LZ*LZ); LX/=LL; LY/=LL; LZ/=LL;
+var PERSP = 16;
+var isAcc = {7:1,16:1,25:1};
+
+var secs = [], psmooth = 0, tStart = performance.now(), mx = 0, my = 0, mxs = 0, mys = 0;
+function collect(){ secs = Array.prototype.slice.call(document.querySelectorAll('[data-sec]')); }
+collect();
+
+function targetP(){
+  var sy = window.scrollY || window.pageYOffset || 0, sc = sy + H*.5, m = [], i;
+  for(i=0;i<secs.length;i++){ var r = secs[i].getBoundingClientRect(); m.push(r.top + sy + r.height/2); }
+  if(sc <= m[0]) return 0;
+  if(sc >= m[m.length-1]) return m.length-1;
+  for(i=0;i<m.length-1;i++){
+    if(sc < m[i+1]){
+      var f = (sc-m[i])/(m[i+1]-m[i]);
+      f = Math.min(1, Math.max(0, (f-.25)/.5));
+      f = f*f*(3-2*f);
+      return i + f;
+    }
+  }
+  return m.length-1;
+}
+function lerp(a,b,t){ return a+(b-a)*t; }
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+function easeOut(x){ return 1-Math.pow(1-x,3); }
+
+function frame(now){
+  requestAnimationFrame(frame);
+  var time = (now - tStart)/1000;
+  var intro = reduced ? 1 : clamp((now - tStart)/2200, 0, 1);
+  var tp = targetP();
+  if(reduced){ if(psmooth !== tp){ psmooth = tp; dirty = true; } }
+  else {
+    var d = tp - psmooth;
+    if(Math.abs(d) < .0005) psmooth = tp; else psmooth += d*.1;
+  }
+  if(reduced && !dirty) return;
+  dirty = false;
+
+  mxs += (mx-mxs)*.06; mys += (my-mys)*.06;
+
+  var p = clamp(psmooth, 0, NS-1), i0 = Math.min(Math.floor(p), NS-2), f = p - i0;
+  var A = SHAPES[i0], B = SHAPES[i0+1], CA = CAMS[i0], CB = CAMS[i0+1];
+  var mobile = W <= 860;
+  var cxF = mobile ? .5 : lerp(CA.cx, CB.cx, f);
+  var cx = W*cxF, cy = H*(mobile ? .3 : .5);
+  var U = mobile ? Math.min(W*.15, H*.16) : Math.min(W*.1, H*.18);
+  var sc = lerp(CA.sc, CB.sc, f) * U;
+  var osc = lerp(CA.osc, CB.osc, f);
+  var yaw = lerp(CA.yaw, CB.yaw, f) + (reduced ? 0 : Math.sin(time*.6)*osc + mxs*.35);
+  var pitch = lerp(CA.pitch, CB.pitch, f) + (reduced ? 0 : Math.cos(time*.45)*osc*.3 - mys*.15);
+  var cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+
+  /* view-space rotation: yaw around Y, then pitch around X */
+  function rx(x,y,z){ return x*cyw + z*syw; }
+  function rz1(x,z){ return -x*syw + z*cyw; }
+  function ry(y,z1){ return y*cp + z1*sp; }
+  function rz(y,z1){ return -y*sp + z1*cp; }
+
+  var faces = [];
+  for(var n=0;n<N;n++){
+    var loc = clamp((intro - (n/N)*.4)/.6, 0, 1), e = easeOut(loc);
+    var k3 = n*3, c3 = [0,0,0], h3 = [0,0,0], q;
+    for(q=0;q<3;q++){
+      var pt = lerp(A.pos[k3+q], B.pos[k3+q], f), sz = lerp(A.size[k3+q], B.size[k3+q], f);
+      c3[q] = lerp(scPos[k3+q], pt, e);
+      h3[q] = lerp(scSize[k3+q], sz, e) / 2;
+    }
+    /* rotated centre and axes */
+    var x1 = rx(c3[0],c3[1],c3[2]), z1 = rz1(c3[0],c3[2]);
+    var cX = x1, cY = ry(c3[1],z1), cZ = rz(c3[1],z1);
+    /* axes in view space */
+    var AXX = [cyw, ry(0,-syw), rz(0,-syw)];   /* image of (1,0,0) */
+    var AXY = [0, cp, -sp];                     /* image of (0,1,0) */
+    var AXZ = [syw, ry(0,cyw), rz(0,cyw)];     /* image of (0,0,1) */
+    var axes = [AXX, AXY, AXZ];
+    var alpha = clamp(loc*2.2, 0, 1);
+
+    for(var fi=0;fi<6;fi++){
+      var fd = FACES[fi], axis = axes[fd[0]], sg = fd[1], hh = h3[fd[0]];
+      var nx = axis[0]*sg, ny = axis[1]*sg, nz = axis[2]*sg;
+      var fx = cX + nx*hh, fy = cY + ny*hh, fz = cZ + nz*hh;
+      if(nx*fx + ny*fy + nz*(fz+PERSP) >= 0) continue;   /* обратная грань */
+      var ids = fd[2], pts = [];
+      for(var vi=0;vi<4;vi++){
+        var v = VERT[ids[vi]];
+        var vx = cX + AXX[0]*v[0]*h3[0] + AXY[0]*v[1]*h3[1] + AXZ[0]*v[2]*h3[2];
+        var vy = cY + AXX[1]*v[0]*h3[0] + AXY[1]*v[1]*h3[1] + AXZ[1]*v[2]*h3[2];
+        var vz = cZ + AXX[2]*v[0]*h3[0] + AXY[2]*v[1]*h3[1] + AXZ[2]*v[2]*h3[2];
+        var kk = PERSP/(PERSP+vz);
+        pts.push(cx + vx*sc*kk, cy - vy*sc*kk);
+      }
+      var lam = Math.max(0, nx*LX + ny*LY + nz*LZ);
+      faces.push({pts:pts, dist:fx*fx + fy*fy + (fz+PERSP)*(fz+PERSP), lum:.42 + .78*lam, acc:!!isAcc[n], a:alpha});
+    }
+  }
+  faces.sort(function(a,b){ return b.dist - a.dist; });
+
+  ctx.clearRect(0,0,W,H);
+  ctx.lineJoin = 'round'; ctx.lineWidth = 1;
+  for(var j=0;j<faces.length;j++){
+    var F = faces[j], P = F.pts, r,g,b;
+    if(F.acc){ r = 200*F.lum; g = 240*F.lum; b = 76*F.lum; }
+    else { r = 46*F.lum; g = 54*F.lum; b = 48*F.lum; }
+    ctx.globalAlpha = F.a;
+    ctx.beginPath();
+    ctx.moveTo(P[0],P[1]); ctx.lineTo(P[2],P[3]); ctx.lineTo(P[4],P[5]); ctx.lineTo(P[6],P[7]);
+    ctx.closePath();
+    ctx.fillStyle = 'rgb(' + Math.min(255,r|0) + ',' + Math.min(255,g|0) + ',' + Math.min(255,b|0) + ')';
+    ctx.fill();
+    ctx.strokeStyle = F.acc ? 'rgba(16,21,10,.35)' : 'rgba(200,240,76,.22)';
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('scroll', function(){ dirty = true; }, {passive:true});
+window.addEventListener('load', function(){ dirty = true; });
+if(!reduced && !inTg){
+  window.addEventListener('pointermove', function(e){
+    if(e.pointerType === 'touch') return;
+    mx = e.clientX/W - .5; my = e.clientY/H - .5;
+  }, {passive:true});
+}
+resize();
+requestAnimationFrame(function(now){ tStart = now; frame(now); });
+})();
+</script>
+</body>
+</html>
